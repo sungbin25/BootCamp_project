@@ -1,0 +1,14 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+yfinance==1.5.1 #0.2.43
+pandas==2.2.2
+numpy==1.26.4
+scikit-learn==1.5.1
+requests==2.32.3
+SQLAlchemy==2.0.35
+PyMySQL==1.1.1
+cryptography==43.0.1
+
+mlflow==2.16.2
+boto3==1.35.24
+xgboost

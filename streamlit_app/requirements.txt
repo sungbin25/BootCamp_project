@@ -1,0 +1,6 @@
+streamlit==1.38.0
+pandas==2.2.2
+pyarrow==17.0.0
+plotly==5.23.0
+requests==2.32.3
+streamlit-plotly-events==0.0.6

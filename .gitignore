@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+.venv/
+venv/
+
+# Environment
+.env
+
+# Backup
+stock-llm-pipeline-new/
+
+# Data
+data/
+
+# MLflow
+mlruns/
+artifacts/
+
+# Airflow
+logs/
+airflow/logs/
+
+# Spark
+spark-warehouse/
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Windows ADS
+*:Zone.Identifier
+
+# Jupyter
+.ipynb_checkpoints/

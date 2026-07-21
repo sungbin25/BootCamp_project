@@ -1,0 +1,21 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "airflow"
+    static_configs:
+      - targets: ["airflow-webserver:8080"]
+
+  - job_name: "spark-master"
+    metrics_path: /metrics/master/prometheus
+    static_configs:
+      - targets: ["spark-master:8080"]
+
+  - job_name: "mlflow"
+    static_configs:
+      - targets: ["mlflow:5000"]
+
+# 참고: Airflow/MLflow의 /metrics 엔드포인트는 기본 이미지에는 없을 수 있어
+# statsd-exporter 또는 prometheus-flask-exporter 연동이 필요할 수 있습니다.
+# 데모 단계에서는 Grafana에서 Postgres(Airflow 메타DB)를 직접 데이터소스로
+# 연결해 DAG 성공률/실행시간을 SQL로 조회하는 방식이 더 간단합니다.
