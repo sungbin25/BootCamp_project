@@ -1,163 +1,277 @@
-# Stock Insight AI Platform (포트폴리오 데모)
+# Stock Insight AI Platform (Portfolio Project)
 
-종목을 검색하면 주가 차트, 변곡점(급등락) 자동 탐지, 관련 뉴스 LLM 요약, 영향도 분석,
-미래 주가 예측까지 한 화면에서 제공하는 AI 기반 주식 분석 플랫폼입니다.
+AI 기반 주식 종합 분석 및 시계열 머신러닝 예측 플랫폼입니다.
 
-> ⚠️ 본 프로젝트는 학습/포트폴리오 목적이며, 실제 투자 자문 서비스가 아닙니다.
-> 크롤링 대상 사이트의 이용약관과 robots.txt를 사전에 확인하세요.
+사용자는 종목을 검색하면 주가 차트, 변곡점(급등락) 자동 탐지, 뉴스·커뮤니티 여론 수집 및 LLM 종합 감성 분석, 머신러닝(RandomForest) 기반 주가 방향 예측, Historical Replay를 통한 과거 예측 성능 실증 검증까지 하나의 종합 대시보드에서 온디맨드(On-demand)로 확인할 수 있습니다.
 
-## 두 개의 레이어로 구성됩니다
+> ⚠️ **Disclaimer**: 본 프로젝트는 교육 및 포트폴리오 목적으로 제작되었으며, 실제 투자 자문이나 금융 권유 서비스를 제공하지 않습니다.
 
-1. **실시간 서빙 레이어 (UR-01~UR-12 요구사항 담당)**
-   `backend`(FastAPI) + `mysql` + `streamlit`. 사용자가 종목을 검색하면
-   그 자리에서 즉시 가격 조회, 변곡점 탐지, 뉴스 수집·LLM 요약, 예측을 수행합니다.
-   **이 레이어만으로도 데모가 완결됩니다.**
+---
 
-2. **배치 파이프라인 레이어 (MLOps 역량 시연용, 선택)**
-   `airflow` + `spark` + `mlflow` + `minio`. 대량 데이터를 정기적으로 수집·정제하고
-   모델을 재학습하는 파이프라인입니다. 실시간 서빙과는 독립적으로 동작합니다.
+## 📸 Platform Overview (시연 스크린샷)
 
-## 아키텍처
+<p align="center">
+  <img src="https://raw.githubusercontent.com/placeholder/stock-insight-ai/main/docs/images/dashboard_main.png" width="95%" alt="Main Dashboard Screenshot" /><br>
+  <em>[메인 대시보드: 주가 차트, 변곡점 마커 및 AI 2단계 주가 예측 패널]</em>
+</p>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/placeholder/stock-insight-ai/main/docs/images/historical_replay.png" width="47%" alt="Historical Replay Screenshot" />
+  <img src="https://raw.githubusercontent.com/placeholder/stock-insight-ai/main/docs/images/community_analysis.png" width="47%" alt="Community Analysis Screenshot" /><br>
+  <em>[좌: Historical Replay 오차 검증 | 우: 커뮤니티 토론방 투자심리 6대 분류 분석]</em>
+</p>
+
+---
+
+## 🌟 주요 기능 (Key Features)
+
+- **🔍 On-demand 종목 검색 & 차트 조회**: KOSPI / KOSDAQ 전 종목 검색 및 기간별(1일~전체) 동적 주가/거래량 Plotly 차트 표출
+- **⚡ 변곡점(급등락) 자동 탐지**: 5일 누적 등락률 ±10% 이상 및 거래량 급증(z-score ≥ 2.0) 기반 기술적 변곡점 자동 포착 및 이벤트 마커 시각화
+- **📰 뉴스 3차원 영향도 분석**: 네이버 최신 뉴스 온디맨드 수집 및 로컬 LLM(Ollama) 기반 핵심 요약, 호재/악재 분류, 3차원 주가 영향도 평가
+- **💬 커뮤니티 투자 심리 6대 분류**: 종목별 네이버 증권 종목토론방 게시글 자동 수집 및 LLM 기반 6대 인텐트(`Bullish`, `Bearish`, `Neutral`, `Question`, `News`, `Humor`) 분류, 핵심 이슈 요약
+- **🤖 2단계 머신러닝 주가 방향 예측**: OHLCV, 기술적 지표, 거시경제 및 감성 지표 기반 RandomForest 1일/1주일/1개월 향후 주가 수치 및 방향 예측
+- **📐 연속적 R² 신뢰도 캘리브레이션**: 회고 평가 R² 점수 및 Decision Tree Ensemble Voting Consensus 기반 연속적 신뢰도 보정 수식을 통해 예측 불확실성 조율
+- **🎯 SHAP 피처 기여도 해설 및 시각화**: SHAP(SHapley Additive exPlanations) 값을 통한 모델 상승/하락 예측 판단 시 주요 지표별 기여도 수치화 및 Plotly 바 차트 시각화
+- **📈 Historical Replay (회고 시뮬레이션 및 오차 검증)**: 과거 변곡 시점 당시 데이터를 기반으로 현재 AI 모델 예측을 재현하고, 실제 5일 발생 주가 추이와 실증 대조하여 적중 여부(`✅/❌`) 및 미적중 원인 분석 제시
+- **💡 LLM 기반 단계적 투자 분석 보고서**: 뉴스, 커뮤니티, 기술적 지표, 머신러닝 예측을 통합한 단계적 분석 리포트 및 AI 종합 투자 의견(매수/관망/매도) 생성
+
+---
+
+## 🛠 Tech Stack
+
+| 구분 | 기술 스택 | 설명 |
+| :--- | :--- | :--- |
+| **Frontend** | Streamlit, Plotly, HTML5/CSS3 | 대화형 프론트엔드 대시보드 및 동적 차트 시각화 |
+| **Backend** | FastAPI, Python 3.11, Pydantic, SQLAlchemy | On-demand RESTful API 서빙 및 캐싱 |
+| **AI / ML** | Ollama (Qwen2.5:7b / Llama3.2), RandomForest (Scikit-Learn), SHAP | LLM 요약/감성분석, 회귀/분류 예측, SHAP 피처 해설 |
+| **Database** | MySQL 8.0 | 사용자 조회 및 예측 이력 저장 |
+| **MLOps** | Airflow, Spark 3.5, MLflow, MinIO | Airflow 정기 데이터 수집, Spark Feature Engineering, MLflow 모델 버저닝, MinIO Artifact 저장 |
+| **Monitoring** | Prometheus, Grafana | 배치 DAG 성공률 및 API 시스템 메트릭 모니터링 |
+| **Infrastructure**| Docker, Docker Compose | 전체 11개 컨테이너 서비스 오케스트레이션 |
+
+---
+
+## 🏗 System Architecture & Internal Pipeline
+
+### 1. 시스템 아키텍처 (Architecture)
+
+```text
+                                [ 사용자 ]
+                                    │
+                                    ▼
+                         Streamlit Frontend (8501)
+                                    │
+                                    ▼
+                         FastAPI Backend (8000)
+                                    │
+  ┌───────────────┬─────────────────┼─────────────────┬────────────────┐
+  │               │                 │                 │                │
+  ▼               ▼                 ▼                 ▼                ▼
+yfinance      changepoint      news_service      community_service   predict_service
+(주가/지표)  (변곡점 탐지)     (뉴스 수집)       (토론방 크롤링)     (RF/SHAP 예측)
+                                    │                 │                │
+                                    └────────┬────────┘                │
+                                             ▼                         │
+                                      llm_service                      │
+                                   (Ollama Qwen 2.5)                   │
+                                             │                         │
+  ───────────────────────────────────────────┴─────────────────────────┴────────────
+  [MLOps 파이프라인] Airflow (8081) ──> Spark ──> MLflow (5000) ──> MinIO (9001) / MySQL
 ```
-[사용자] → Streamlit(8501) → FastAPI backend(8000)
-                                   ├─ yfinance          (UR-02,03 가격 조회)
-                                   ├─ changepoint.py     (UR-04,05 변곡점 탐지)
-                                   ├─ news_service.py    (UR-07 뉴스 수집, 네이버 API)
-                                   ├─ llm_service.py     (UR-08,09,12 LLM 요약/분석/설명, Ollama)
-                                   ├─ predict_service.py (UR-10,11 예측)
-                                   └─ MySQL               (조회/예측 로그 저장)
 
-[배치, 선택] Airflow → Spark → MLflow → MinIO   (대량 수집/재학습용, README 하단 참고)
+### 2. predict_service 내부 실행 순서 (Prediction Pipeline Sequence)
+
+```text
+  [입력 데이터 (43개 Feature)]
+               │
+               ▼
+   RandomForest Regression 예측  ──>  Tree Voting Consensus (부호 일치율) 계산
+               │                                      │
+               ▼                                      ▼
+   SHAP Attribution 계산 (피처 기여도)   Continuous R² Calibration (신뢰도 조율)
+               │                                      │
+               └──────────────────┬───────────────────┘
+                                  ▼
+                     Final Direction Confidence
 ```
 
+### 3. 처리 흐름 (Data Flow)
 
-## 사전 준비물
+```text
+사용자 종목 검색 요청 (On-demand)
+    │
+    ▼
+주가 데이터 수집 (yfinance API) & 기술적 지표 산출
+    │
+    ▼
+변곡점 자동 탐지 (5일 누적 등락률 ±10% / 거래량 Z-Score ≥ 2.0)
+    │
+    ├─────────────────────────────┐
+    ▼                             ▼
+뉴스 수집 (네이버 API)         커뮤니티 수집 (네이버 증권 토론방)
+    │                             │
+    └──────────────┬──────────────┘
+                   ▼
+       LLM 요약 및 6대 인텐트 감성 분류 (Ollama)
+                   │
+                   ▼
+      기술적 + 감성 43개 Feature 생성
+                   │
+                   ▼
+   RandomForest 회귀 예측 & Tree Consensus 계산
+                   │
+                   ▼
+   연속적 R² 캘리브레이션 적용 (Final Confidence 산출)
+                   │
+                   ▼
+   Historical Replay 시뮬레이션 & 오차 실증 분석
+                   │
+                   ▼
+   LLM 기반 단계적 투자 분석 보고서 출력
+```
 
-1. **Docker Desktop** (또는 Docker Engine + Compose v2) 설치
-   - 최소 사양 권장: RAM 8GB 이상, 디스크 여유 10GB 이상
-2. **네이버 오픈API 키** 발급 (무료)
-   - https://developers.naver.com/apps/#/register 에서 애플리케이션 등록 → "검색" API 사용 설정
-3. `.env.example`을 복사해 `.env` 생성 후 발급받은 키 입력
+---
 
+## 🤖 AI & LLM 분석 파이프라인
+
+### 📰 뉴스 분석 (News Pipeline)
+- 네이버 뉴스 API를 통해 직근 3일간의 종목 뉴스 온디맨드 수집
+- LLM을 통해 핵심 헤드라인 3줄 요약, 긍정/부정/중립 감성 점수 산출 및 3차원 주가 영향도 평가
+
+### 💬 커뮤니티 분석 (Community Pipeline)
+- 종목별 커뮤니티(네이버 증권 종목토론방) 최신 게시글 100~300건 온디맨드 수집
+- 1차 사전 분류 + 2차 LLM 6대 인텐트 분류(`Bullish`, `Bearish`, `Neutral`, `Question`, `News`, `Humor`)를 거쳐 여론 비중 집계 및 핵심 이슈 요약 생성
+
+### 💡 LLM 기반 단계적 투자 분석 보고서 (Investment Decision Report)
+- 뉴스 감성, 커뮤니티 여론, 기술적 지표(MACD, RSI, BB), 머신러닝 주가 방향 예측 결과를 종합 가중 평가하여 **매수(BUY)**, **관망(HOLD)**, **매도(SELL)** 단계적 리포트 생성
+
+---
+
+## 📈 Historical Replay (회고 시뮬레이션 및 오차 검증)
+
+과거 변곡 시점을 선택하면 당시 수집 데이터 및 기술 지표를 바탕으로 AI 모델의 회고 예측을 재현하고, 실제 발생한 주가 추이와 실증 대조합니다.
+
+```text
+📈 AI Historical Replay (회고 시뮬레이션 및 오차 검증)
+
+[ Replay 종합 점수 ]   [ 당시 AI 예상 5일 ]   [ 실제 발생 5일 ]   [ 예측 적중 여부 ]
+   96 / 100점               ▲ +11.5%             ▼ -7.5%          ❌ 미적중
+    Neutral                                                     오차: 19.0%p
+
+🧐 AI 회고 및 오차 원인 실증 분석
+ - ✔ 변곡 당일 기술적 지표 신호(거래량/크로스) 포착
+ - ✖ 변곡 직후 외국인·기관 수급 이탈 및 매크로 시장 조정 발생
+```
+
+- **제공 정보**:
+  - `Technical Signal Score`: 기술적 지표 포착 점수 (100점 만점)
+  - `Replay Evaluation`: 당시 AI 예상 5일 수익률 vs 실제 발생 5일 수익률
+  - `예측 적중 여부`: 방향 일치 시 `✅ 적중`, 불일치 시 `❌ 미적중 (오차 %p)`
+  - `AI 오차 원인 실증 분석`: 미적중 시 당시 외생 변수 및 수급 변경 사유 해설
+
+---
+
+## 🧠 머신러닝 & 연속적 R² 신뢰도 보정
+
+### 1. Feature 스펙 (총 43개 정량·정성 Feature)
+- **주가/거래량 (17개)**: OHLCV, 일일/5일/20일 수익률, 이동평균 이격도(MA5/20/60), 변동성, 거래량 비율/변화율, Lag 지표
+- **기술적 지표 (8개)**: RSI(14), MACD, MACD Signal, MACD Hist, Bollinger %B, Bollinger Upper/Lower Gap, ATR(14), Volume Z-Score
+- **거시경제 & 수급 (9개)**: KOSPI 수익률/이격도, KOSDAQ 수익률, 환율(USD/KRW) 변동률/이격도, VIX Index, 시장 거래대금 변화율
+- **정성 감성 지표 (9개)**: 뉴스 긍부정 점수, 뉴스 3일/7일 감성 지수, 커뮤니티 3일/7일 여론 지수
+
+### 2. 연속적 R² 신뢰도 캘리브레이션 수식 (Continuous Calibration Flow)
+
+$$\text{Tree Consensus} = \frac{\text{방향 일치 Decision Tree 개수}}{\text{전체 Decision Tree 개수}} \times 100\%$$
+
+$$\text{Calibration Factor}(R^2) = \max\left(0.4, \min\left(1.0, \frac{R^2 + 1.0}{2.0}\right)\right)$$
+
+$$\text{Final Direction Confidence} = \max\left(50.0\%, \min\left(99.0\%, \text{Tree Consensus} \times \text{Calibration Factor}(R^2)\right)\right)$$
+
+```text
+Tree Consensus (Tree Voting 부호 일치율)
+        │
+        ▼
+Continuous R² Calibration (R² 성과 연동 감쇄)
+        │
+        ▼
+Final Direction Confidence (최종 방향 신뢰도)
+```
+
+---
+
+## 📁 디렉토리 구조 (Directory Structure)
+
+```text
+stock-llm-pipeline/
+├── docker-compose.yml              # 전체 통합 11개 컨테이너 스택 정의
+├── .env.example                    # 환경변수 템플릿 (네이버 API 키 등)
+├── backend/                        # ★ FastAPI 백엔드 API (On-demand 서빙)
+│   ├── main.py                     # FastAPI 엔드포인트 라우팅 및 캐싱
+│   ├── predict_service.py          # 머신러닝 예측, SHAP 및 R² 캘리브레이션
+│   ├── news_service.py             # 네이버 뉴스 수집 & LLM 영향도 분석
+│   ├── community_service.py        # 네이버 증권 토론방 수집 & 6대 인텐트 분류
+│   ├── llm_service.py              # Ollama LLM 연동 헬퍼
+│   ├── changepoint.py              # 변곡점 탐지 및 Historical Replay
+│   ├── analyze_service.py          # LLM 기반 단계적 투자 분석 보고서 생성 Engine
+│   ├── ticker_map.py               # 종목 코드 매핑
+│   └── db.py                       # MySQL 데이터베이스 연동
+├── streamlit_app/
+│   ├── app.py                      # ★ 메인 대시보드 UI (Streamlit & Plotly)
+│   └── Dockerfile.streamlit
+├── dags/
+│   └── stock_pipeline_dag.py       # [MLOps] Airflow 정기 데이터 수집 & 재학습 DAG
+├── crawlers/                       # [MLOps] 배치 수집용 크롤러
+├── spark_jobs/                     # [MLOps] Spark Feature Engineering 작업
+├── mlflow_scripts/                 # [MLOps] MLflow 모델 재학습 및 레지스트리 관리
+└── monitoring/                     # Prometheus & Grafana 대시보드 설정
+```
+
+---
+
+## 🚀 시작하기 (Quick Start)
+
+### 1. 사전 준비
+- Docker Engine & Docker Compose v2 (권장 RAM 8GB 이상)
+- 네이버 개발자 센터 (https://developers.naver.com) 검색 API 키 발급
+
+### 2. 환경 변수 설정
 ```bash
 cp .env.example .env
-# .env 파일 열어서 NAVER_CLIENT_ID / NAVER_CLIENT_SECRET 채우기
+# .env 파일 내 NAVER_CLIENT_ID 및 NAVER_CLIENT_SECRET 입력
 ```
 
-## 실행 순서
-
-### 1) 전체 스택 기동
+### 3. 전체 스택 실행
 ```bash
 docker compose up -d
 ```
-- 첫 실행 시 이미지 다운로드 + Airflow 커스텀 이미지 빌드(JDK 설치 포함)로 **10~15분** 정도 걸릴 수 있습니다.
-- `-d`는 백그라운드 실행 옵션입니다.
 
-> ℹ️ Spark는 `bitnami/spark` 무료 태그가 2025년 하반기부터 중단되어 Apache 공식 이미지(`apache/spark:3.5.3-python3`)를 사용합니다.
-> Airflow는 `spark-submit`(pyspark) 실행에 JDK가 필요해서 공식 이미지를 그대로 쓰지 않고 `airflow_image/Dockerfile`로 직접 빌드합니다.
-
-### 2) 각 서비스 접속 확인
-
-| 서비스 | URL | 계정 |
-|---|---|---|
-| **Streamlit (메인 화면)** | http://localhost:8501 | - |
-| **FastAPI backend (Swagger 문서)** | http://localhost:8000/docs | - |
-| MySQL | localhost:3306 | stockapp / stockapp |
-| Airflow (배치, 선택) | http://localhost:8081 | admin / admin |
-| MLflow (배치, 선택) | http://localhost:5000 | - |
-| Spark Master UI (배치, 선택) | http://localhost:8080 | - |
-| MinIO 콘솔 (배치, 선택) | http://localhost:9001 | minioadmin / minioadmin |
-| Grafana | http://localhost:3000 | admin / admin |
-| Prometheus | http://localhost:9090 | - |
-
-### 3) [선택, 배치 파이프라인용] MinIO에 MLflow 아티팩트용 버킷 생성
-메인 데모(종목 검색/차트/예측)만 보실 거라면 이 단계는 건너뛰어도 됩니다.
-Airflow 배치 파이프라인까지 시연하실 경우에만, MinIO 콘솔(9001)에서
-`mlflow-artifacts` 버킷을 하나 생성하세요.
-
-### 4) Ollama 모델 다운로드 (최초 1회)
+### 4. Ollama LLM 모델 다운로드 (최초 1회)
 ```bash
 docker exec -it stock-llm-pipeline-ollama-1 ollama pull qwen2.5:7b
 ```
-GPU가 없다면 더 가벼운 모델(`qwen2.5:1.5b`, `llama3.2:3b`)로 대체해도 됩니다.
 
-### 5) 메인 데모 사용 (UR-01~UR-12)
-1. http://localhost:8501 접속
-2. 종목 검색창에 "삼성전자" 입력 → 검색결과에서 선택 → "이 종목 선택" 클릭
-3. 상단 기간 버튼(1일~전체)으로 조회 기간 변경
-4. 차트에 표시된 ★ 변곡점을 클릭(또는 드롭다운 선택) → 뉴스 수집·LLM 요약·영향도 분석 확인
-5. "예측 시점"에서 1일/1주일/1개월 선택 → 차트에 빨간 점선으로 예측치 표시, 하단에 LLM 예측 근거 확인
+### 5. 서비스 접속 정보
+- **Streamlit 메인 UI**: `http://localhost:8501`
+- **FastAPI Docs**: `http://localhost:8000/docs`
+- **MLflow Dashboard**: `http://localhost:5000`
+- **Airflow DAG Manager**: `http://localhost:8081` (admin / admin)
+- **MinIO Console**: `http://localhost:9001` (minioadmin / minioadmin)
+- **Grafana Monitoring**: `http://localhost:3000` (admin / admin)
 
-> FastAPI 문서(http://localhost:8000/docs)에서 각 엔드포인트를 개별적으로 테스트해볼 수도 있습니다.
+---
 
-### 6) [선택] Airflow 배치 파이프라인 실행
-1. http://localhost:8081 접속 (admin/admin)
-2. `stock_pipeline_dag` 토글 ON → 우측 ▶(Trigger DAG)로 수동 1회 실행
-3. MLflow(5000) → Experiments에서 학습 로그, Model Registry에서 버전 확인
-4. Grafana(3000) → Airflow 메타DB / MySQL(조회·예측 로그) 연동된 대시보드로 실행 이력 조회
+## 📋 요구사항 (UR) ↔ 코드 매핑표
 
-## 디렉토리 구조
-```
-.
-├── docker-compose.yml          # 전체 스택 정의
-├── init-multi-db.sh             # Postgres 내 airflow/mlflow DB 자동 생성 (배치용)
-├── backend/                     # ★ 실시간 서빙 API (UR-01~UR-12 핵심)
-│   ├── main.py                  # FastAPI 엔드포인트 전체
-│   ├── ticker_map.py            # UR-01 종목 검색
-│   ├── changepoint.py           # UR-04,05 변곡점 탐지
-│   ├── news_service.py          # UR-07 뉴스 수집 (네이버 API)
-│   ├── llm_service.py           # UR-08,09,12 LLM 요약/영향도/예측근거
-│   ├── predict_service.py       # UR-10,11 예측 모델
-│   ├── db.py                    # MySQL 로그 저장
-│   └── Dockerfile
-├── streamlit_app/
-│   ├── app.py                   # ★ 메인 화면 UI (UR-01~UR-12 전체)
-│   └── Dockerfile.streamlit
-├── dags/
-│   └── stock_pipeline_dag.py    # [배치] Airflow 메인 DAG
-├── crawlers/                    # [배치] 대량 수집용 크롤러
-├── spark_jobs/                  # [배치] Spark 정제
-├── mlflow_scripts/              # [배치] 모델 재학습
-└── monitoring/                  # Grafana/Prometheus
-```
-
-## 요구사항(UR) ↔ 코드 매핑
-
-| 요구사항 | 구현 위치 |
-|---|---|
-| UR-01 종목 검색 | `backend/ticker_map.py`, `GET /search` |
-| UR-02 기간 선택 | `streamlit_app/app.py` 상단 버튼, `backend/main.py`의 `PERIOD_MAP` |
-| UR-03 주가 차트 | `GET /prices/{ticker}`, Streamlit plotly 차트 |
-| UR-04 변곡점 탐지 | `backend/changepoint.py` |
-| UR-05 이벤트 마커 | Streamlit 차트의 별(★) 마커 |
-| UR-06 마커 클릭 | `streamlit-plotly-events` (미설치 시 드롭다운 대체) |
-| UR-07 뉴스 자동 수집 | `backend/news_service.py` |
-| UR-08 LLM 뉴스 요약 | `backend/llm_service.py::summarize_news` |
-| UR-09 뉴스 영향도 분석 | `backend/llm_service.py::analyze_impact` |
-| UR-10 미래 주가 예측 | `backend/predict_service.py` |
-| UR-11 예측 시각화(점선) | Streamlit 차트의 빨간 점선 |
-| UR-12 예측 근거 설명 | `backend/llm_service.py::explain_prediction` |
-
-## 다음 단계로 확장하고 싶다면
-- 감성분석을 간이 사전(`spark_jobs/clean_and_join.py`의 `POSITIVE_WORDS`) 대신
-  **KR-FinBert** 등 사전학습 모델로 교체
-- `check_retrain_needed`에 모델 드리프트(정확도 하락) 감지 로직 추가
-- MLflow Model Registry의 Staging → Production 승격 프로세스 도입
-- Grafana에 커스텀 대시보드 JSON 추가 (DAG 성공률, 평균 실행시간 패널)
-
-## 트러블슈팅
-- **Streamlit에서 "API 호출 실패"가 뜸**: `docker compose logs backend`로 원인 확인. 대부분
-  MySQL 헬스체크가 끝나기 전에 backend가 뜨려다 실패한 경우이므로 `docker compose restart backend`
-- **뉴스 요약/영향도/예측근거가 비어있음**: Ollama 모델을 아직 pull하지 않았을 가능성이 높습니다.
-  `docker exec -it <ollama_container> ollama list`로 모델이 있는지 확인
-- **"수집된 뉴스가 없습니다"만 나옴**: `.env`의 `NAVER_CLIENT_ID/SECRET` 미설정 또는 오류.
-  `docker compose logs backend`에서 네이버 API 응답 상태코드 확인
-- **변곡점이 하나도 안 뜸**: 짧은 기간(1일/1주일)에서는 조건(5일 누적 ±10%)을 만족하기 어렵습니다.
-  1개월 이상 기간에서 확인하세요
-- **`bitnami/spark:3.5: not found` 에러**: 최신 파일을 받으셨다면 이미 `apache/spark:3.5.3-python3`로 교체되어 있습니다.
-  혹시 예전 zip을 쓰고 계시다면 `docker-compose.yml`의 spark-master/spark-worker 이미지를 이 태그로 바꿔주세요.
-- **Airflow 컨테이너가 계속 재시작됨**: `docker compose logs airflow-init`으로 DB 마이그레이션 로그 확인
-- **Spark job이 데이터를 못 찾음**: `data/` 볼륨 마운트 경로가 Airflow 컨테이너(`/opt/airflow/data`)와
-  Spark 컨테이너(`/opt/data`)에서 다르므로, DAG의 BashOperator 명령어 경로를 컨테이너 기준으로 맞췄는지 확인
-- **네이버 API 401 에러**: `.env`의 Client ID/Secret이 정확한지, 애플리케이션에 "검색" API가 활성화되어 있는지 확인
+| 요구사항 ID | 요구사항 명칭 | 구현 파일 위치 |
+| :--- | :--- | :--- |
+| **UR-01** | 종목 검색 | `backend/ticker_map.py`, `GET /search` |
+| **UR-02/03** | 주가 차트 및 기간 조회 | `streamlit_app/app.py`, `GET /prices/{ticker}` |
+| **UR-04/05** | 변곡점 자동 탐지 & 마커 | `backend/changepoint.py`, `detect_changepoints` |
+| **UR-07** | 뉴스 수집 | `backend/news_service.py` |
+| **UR-08/09** | LLM 뉴스 요약 & 영향도 | `backend/news_service.py`, `backend/llm_service.py` |
+| **UR-10** | 머신러닝 주가 방향 예측 | `backend/predict_service.py` |
+| **UR-11** | 예측 점선 시각화 | `streamlit_app/app.py` (Plotly overlay) |
+| **UR-12** | 예측 근거 & SHAP 분해 시각화 | `backend/predict_service.py`, `streamlit_app/app.py` |
+| **UR-13** | 커뮤니티 6대 인텐트 수집/요약 | `backend/community_service.py` |
+| **UR-14** | LLM 단계적 투자 분석 보고서 | `backend/analyze_service.py` |
+| **UR-15** | Historical Replay 오차 실증 검증 | `backend/changepoint.py` |
