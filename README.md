@@ -10,15 +10,27 @@ AI 기반 주식 종합 분석 및 시계열 머신러닝 예측 플랫폼입니
 
 ## 📸 Platform Overview (시연 스크린샷)
 
+
 <p align="center">
-  <img src="https://raw.githubusercontent.com/placeholder/stock-insight-ai/main/docs/images/dashboard_main.png" width="95%" alt="Main Dashboard Screenshot" /><br>
-  <em>[메인 대시보드: 주가 차트, 변곡점 마커 및 AI 2단계 주가 예측 패널]</em>
+  <img src="docs/images/image01.png" width="95%" alt="Main Dashboard Screenshot" /><br>
+  <em>[메인 홈 화면 : 주식 목록 표기]</em>
 </p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/placeholder/stock-insight-ai/main/docs/images/historical_replay.png" width="47%" alt="Historical Replay Screenshot" />
-  <img src="https://raw.githubusercontent.com/placeholder/stock-insight-ai/main/docs/images/community_analysis.png" width="47%" alt="Community Analysis Screenshot" /><br>
-  <em>[좌: Historical Replay 오차 검증 | 우: 커뮤니티 토론방 투자심리 6대 분류 분석]</em>
+  <img src="docs/images/image02.png" width="47%" alt="Historical Replay Screenshot" />
+  <img src="docs/images/image03.png" width="47%" alt="Community Analysis Screenshot" /><br>
+  <em>[좌: 해당 종목 주가 그래프 | 우:Historical Replay 오차 검증]</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/image04.png" width="95%" alt="News Analysis Screenshot" /><br>
+  <em>[과거 유사 패턴 매칭]</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/image05.png" width="47%" alt="Prediction Screenshot" />
+  <img src="docs/images/image06.png" width="47%" alt="SHAP Analysis Screenshot" /><br>
+  <em>[좌: 뉴스 분석 | 우: 커뮤니티 분석]</em>
 </p>
 
 ---
